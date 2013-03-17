@@ -1,0 +1,3 @@
+[submodule "lib/RaspberryPi-GPIO"]
+	path = lib/RaspberryPi-GPIO
+	url = git@github.com:sjaeckel/RaspberryPi-GPIO.git
