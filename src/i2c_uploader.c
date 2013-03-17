@@ -17,6 +17,8 @@
 #include <readline/history.h>
 
 #include "printhex.h"
+#include "rpiGpio.h"
+
 
 typedef struct
 {
@@ -134,6 +136,22 @@ main(void)
     } /* while */
   printHexData("buf", buf, buflen);
   fflush(stdout);
+
+  assert(gpioSetup() == OK);
+  assert(gpioI2cSetup() == OK);
+  assert(gpioI2cSetClock(I2C_CLOCK_FREQ_MIN) == OK);
+  assert(gpioI2cSet7BitSlave(0x0) == OK);
+  uint8_t testbuf[10] = {};
+  char* data;
+  while ((data = readline(NULL)) == NULL)
+    sleep(1);
+  size_t datlen = strlen(data) > sizeof(testbuf) ? sizeof(testbuf) : strlen(data);
+  memcpy(testbuf, data, datlen);
+  testbuf[sizeof(testbuf)-1] = '\0';
+  printf("send %d bytes, %s\n", datlen, testbuf);
+  assert(gpioI2cWriteData(testbuf, datlen) == OK);
+
+
   free(buf);
   buf = NULL;
   return EXIT_SUCCESS;
