@@ -1,0 +1,6 @@
+*.hex
+*.elf
+*.lss
+*.map
+
+Debug/
