@@ -16,6 +16,8 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
+#include "printhex.h"
+
 typedef struct
 {
   char     Device[8];              //0x00 - 0x07
@@ -145,18 +147,23 @@ uint8_t _asc2hex(uint8_t* pc_asc)
   return pc_hex;
 } /* _asc2hex() */
 static uint8_t* line;
+uint8_t* buf=NULL;
 
 void cleanUp(void)
 {
   if (line)
     free(line);
+  if (buf)
+    free(buf);
 }
 
 int main(void) {
   //while(readline(NULL));
   //return -1;
   line = NULL;
+  buf = NULL;
   atexit (cleanUp);
+  size_t buflen = 0;
 
   //uint8_t* line = ":100000003AC20000000000000000000000000000F4";
   while ((line = (uint8_t*)readline(NULL)) != NULL)
@@ -167,7 +174,7 @@ int main(void) {
         continue;
       assert(line_len > 8);
       assert((char)line[0] == ':');
-      printf("header found");
+      printf("header found\n");
       uint8_t len = _asc2hex(&line[1]);
       printf("len = %d\n", len);
       uint16_t addr = _asc2hex(&line[3]) << 8 | _asc2hex(&line[5]);
@@ -185,9 +192,21 @@ int main(void) {
       }
       printf("checksum = %d, 0x%08X\n", checksum, checksum);
       assert((checksum&0x0FF) == 0);
+      buf=realloc(buf, buflen + len);
+      printf("realloc buffer len = %d\n", (uint32_t)(buflen + len));
+      {
+        uint8_t i;
+        for (i = 0; i < len; ++i) {
+          buf[buflen + i] = _asc2hex(&line[9 + (2*i)]);
+        }
+      }
+      buflen += len;
 
       free(line);
       line = NULL;
-    }
+    } /* while */
+  printHexData("buf", buf, buflen);
+  free(buf);
+  buf = NULL;
   return EXIT_SUCCESS;
 }
