@@ -138,7 +138,7 @@ main(void)
   fflush(stdout);
 
   assert(gpioSetup() == OK);
-  assert(gpioI2cSetup() == OK);
+  assert(gpioI2cSetup(1) == OK);
   assert(gpioI2cSetClock(I2C_CLOCK_FREQ_MIN) == OK);
   assert(gpioI2cSet7BitSlave(0x0) == OK);
   uint8_t testbuf[10] = {};
