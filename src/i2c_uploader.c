@@ -85,6 +85,7 @@ cleanUp(void)
 int
 main(void)
 {
+  printf("Running version from %s %s\n", __DATE__, __TIME__);
   //while(readline(NULL));
   //return -1;
   line = NULL;
