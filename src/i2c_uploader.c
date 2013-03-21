@@ -143,13 +143,32 @@ main(void)
   assert(gpioI2cSet7BitSlave(0x0) == OK);
   uint8_t testbuf[10] = {};
   char* data;
-  while ((data = readline(NULL)) == NULL)
-    sleep(1);
-  size_t datlen = strlen(data) > sizeof(testbuf) ? sizeof(testbuf) : strlen(data);
-  memcpy(testbuf, data, datlen);
-  testbuf[sizeof(testbuf)-1] = '\0';
-  printf("send %d bytes, %s\n", datlen, testbuf);
-  assert(gpioI2cWriteData(testbuf, datlen) == OK);
+  do {
+    while ((data = readline(NULL)) == NULL)
+      sleep(1);
+    if (strcmp(data, "v") == 0)
+      {
+        int i;
+        for (i = 0; i < 19; ++i) {
+          testbuf[0] = i;
+          assert(gpioI2cWriteData(testbuf, 1) == OK);
+          assert(gpioI2cReadData(testbuf, 1) == OK);
+          printf("%c", testbuf[0]);
+        }
+        printf("\n");
+      }
+    if (data[0] == 'w')
+      {
+        testbuf[0] = data[1] - '0';
+        gpioI2cWriteData(testbuf, 1);
+      }
+    if (strcmp(data, "r") == 0)
+      {
+        testbuf[0] = 0;
+        assert(gpioI2cReadData(testbuf, 1) == OK);
+        printf("%c\n", testbuf[0]);
+      }
+  } while(strcmp(data, "q") != 0);
 
 
   free(buf);
